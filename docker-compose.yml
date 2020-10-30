@@ -8,3 +8,13 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: "shifu_api"
+
+  api:
+    depends_on:
+      - database
+    build: .
+    environment:
+      MYSQL_URL: ''
+    command: gunicorn -w 4 -b 0.0.0.0:8080 'main:create_app()'
+    ports:
+    - '8080:8080'
