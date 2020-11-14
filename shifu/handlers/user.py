@@ -1,15 +1,18 @@
 from marshmallow import ValidationError
-from tornado.web import RequestHandler
 
+from shifu.core.api import BaseHandler
+from shifu.exceptions.users import UserPayloadValidationException
 from shifu.handlers.serializers import UserSchema
+from shifu.helpers.user import encrypt_password
 
 
-class UserHandler(RequestHandler):  # noqa
+class UserHandler(BaseHandler):  # noqa
     def post(self):
         try:
             user = UserSchema().loads(self.request.body)
-            self.set_status(201)
-            self.write(user)
+            user = encrypt_password(user)
         except ValidationError as e:
-            self.set_status(400)
-            self.write({'error': e.messages})
+            raise UserPayloadValidationException(metadata=e.messages)
+
+        self.set_status(201)
+        self.write(user)
