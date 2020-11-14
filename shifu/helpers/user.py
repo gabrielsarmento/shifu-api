@@ -1,4 +1,4 @@
-from bcrypt import hashpw, gensalt
+from bcrypt import gensalt, hashpw
 
 
 def encrypt_password(user: dict) -> dict:
