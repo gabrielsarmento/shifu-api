@@ -1,18 +1,11 @@
-from marshmallow import ValidationError
-
 from shifu.core.api import BaseHandler
-from shifu.exceptions.users import UserPayloadValidationException
-from shifu.handlers.serializers import UserSchema
-from shifu.helpers.user import encrypt_password
+from shifu.helpers.user import encrypt_password, serialize_user_payload
 
 
 class UserHandler(BaseHandler):  # noqa
     def post(self):
-        try:
-            user = UserSchema().loads(self.request.body)
-            user = encrypt_password(user)
-        except ValidationError as e:
-            raise UserPayloadValidationException(metadata=e.messages)
+        user = serialize_user_payload(self.request.body)
+        user = encrypt_password(user)
 
         self.set_status(201)
         self.write(user)

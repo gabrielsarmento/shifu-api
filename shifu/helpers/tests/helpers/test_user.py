@@ -1,7 +1,8 @@
 import mock
 import pytest
 
-from shifu.helpers.user import encrypt_password
+from shifu.exceptions.users import UserPayloadValidationException
+from shifu.helpers.user import encrypt_password, serialize_user_payload
 
 
 @pytest.fixture
@@ -9,6 +10,23 @@ def user_payload():
     return {
         'password': '123'
     }
+
+
+@pytest.fixture
+def user_json():
+    return '''
+    {
+        "name": "lu",
+        "email": "teste@teste.com",
+        "role": "user",
+        "password": "123"
+    }
+    '''
+
+
+@pytest.fixture
+def user_invalid_json():
+    return '{"name": "xablau"}'
 
 
 @pytest.fixture
@@ -40,3 +58,15 @@ def test_should_return_payload_with_encrypted_password(
 
     response = encrypt_password(user_payload)
     assert response['password'] == encrypted_password
+
+
+def test_should_load_valid_request_payload_into_user_payload(
+    user_json
+):
+    user = serialize_user_payload(user_json)
+    assert isinstance(user, dict)
+
+
+def test_should_raise_validation_user_payload_error(user_invalid_json):
+    with pytest.raises(UserPayloadValidationException):
+        serialize_user_payload(user_invalid_json)
